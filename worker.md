@@ -33,6 +33,7 @@ func handle(conn net.Conn) {
 	result := mapper(chunk)
 
 	encoder.Encode(result)
+	fmt.Println("Done")
 }
 
 func main() {
