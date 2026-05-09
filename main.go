@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"sync"
+	"encoding/json"
 )
 
 func split(data []string, size int) [][]string {
@@ -66,14 +67,15 @@ func main() {
 		passwords = append(passwords, scanner.Text())
 	}
 
+	var workerNum int
+	fmt.Print("Enter number of workers : ")
+	fmt.Scan(&workerNum)
 	// 2. Split into 3 chunks
-	chunks := split(passwords, len(passwords)/3)
+	chunks := split(passwords, len(passwords)/workerNum)
 
 	// 3. Workers IPs (غيّرهم حسب أجهزةك)
 	workers := []string{
-		"192.168.1.10:9001",
-		"192.168.1.11:9001",
-		"192.168.1.12:9001",
+		"192.168.1.14:9001",
 	}
 
 	results := make(chan map[string]int, 3)
@@ -104,8 +106,21 @@ func main() {
 	}
 
 	// 7. Output
-	fmt.Println("\nFINAL RESULT:")
-	for k, v := range final {
-		fmt.Println(k, "=>", v)
+	jsonFile, err := os.Create("result.json")
+	if err != nil {
+		fmt.Println("Error creating JSON file:", err)
+		return
 	}
+	defer jsonFile.Close()
+
+	encoder := json.NewEncoder(jsonFile)
+	encoder.SetIndent("", "  ")
+
+	err = encoder.Encode(final)
+	if err != nil {
+		fmt.Println("Error writing JSON:", err)
+		return
+	}
+
+	fmt.Println("Results saved to result.json")
 }
